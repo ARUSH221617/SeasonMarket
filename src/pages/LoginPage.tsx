@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, Transition } from "@headlessui/react";
+import { useStateContext } from "../contexts/ContextProvider";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ export default function LoginPage() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const {token, setToken, user, setUser} = useStateContext();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -27,7 +29,9 @@ export default function LoginPage() {
       });
       const data = await response.json();
       if (data.ok) {
-        setAlertMessage(`Welcome Back ${data.display_name}`);
+        setToken(data.data.token);
+        setUser(data.data.user);
+        setAlertMessage(`Welcome Back ${data.data.display_name}`);
         setIsAlertOpen(true);
         setTimeout(() => {
           setIsAlertOpen(false);
