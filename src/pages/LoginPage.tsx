@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, Transition } from "@headlessui/react";
 import { useStateContext } from "../contexts/ContextProvider";
+import localforage from "localforage";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ export default function LoginPage() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const {token, setToken, user, setUser} = useStateContext();
+  const { token, setToken, user, setUser } = useStateContext();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
