@@ -17,6 +17,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { Link } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider";
+import Banner from "./Banner";
 
 const userMenu = [
   {
@@ -93,21 +94,47 @@ function classNames(...classes) {
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const {user} = useStateContext();
+  const { user, language, languages, setLanguage } = useStateContext();
 
   return (
     <header className="bg-white">
+      <Banner />
       <nav
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
         aria-label="Global"
       >
         <div className="flex lg:flex-1">
           <Link to={"/"} className="-m-1.5 p-1.5">
-            <img
+            {/* <img
               className="h-8 w-auto"
               src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
               alt=""
-            />
+            /> */}
+            <svg
+              width="1080"
+              height="1080"
+              viewBox="0 0 1080 1080"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-16 w-auto"
+            >
+              <path
+                d="M543 389C543 375.193 554.193 364 568 364H968C981.807 364 993 375.193 993 389V498H702C688.193 498 677 509.193 677 523V814H568C554.193 814 543 802.807 543 789V389Z"
+                fill="#2F18C0"
+              />
+              <path
+                d="M517 389C517 375.193 505.807 364 492 364H92C78.1929 364 67 375.193 67 389V498H358C371.807 498 383 509.193 383 523V814H492C505.807 814 517 802.807 517 789V389Z"
+                fill="#2F18C0"
+              />
+              <path
+                d="M993 240C993 226.193 981.807 215 968 215H568C554.193 215 543 226.193 543 240V349H993V240Z"
+                fill="#2F18C0"
+              />
+              <path
+                d="M517 240C517 226.193 505.807 215 492 215H92C78.1929 215 67 226.193 67 240V349H517V240Z"
+                fill="#2F18C0"
+              />
+            </svg>
           </Link>
         </div>
         <div className="flex lg:hidden">
@@ -213,6 +240,65 @@ export default function Header() {
           </Link>
         </Popover.Group>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+          {language ? (
+            <Popover className="relative">
+              <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
+                {language.icon && <language.icon className="h-6 w-6" />}
+
+                <span>{language.name}</span>
+                <ChevronDownIcon
+                  className="h-5 w-5 flex-none text-gray-400"
+                  aria-hidden="true"
+                />
+              </Popover.Button>
+
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-200"
+                enterFrom="opacity-0 translate-y-1"
+                enterTo="opacity-100 translate-y-0"
+                leave="transition ease-in duration-150"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-1"
+              >
+                <Popover.Panel className="absolute -right-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5">
+                  <div className="p-4">
+                    {languages &&
+                      languages.map((item) => (
+                        <div
+                          key={item.name}
+                          className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
+                        >
+                          <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                            <item.icon
+                              className="h-6 w-6 text-gray-600 group-hover:text-indigo-600"
+                              aria-hidden="true"
+                            />
+                          </div>
+                          <div className="flex-auto">
+                            <button
+                              onClick={() =>
+                                setLanguage(
+                                  languages.find(
+                                    (lang) => lang.name === item.name
+                                  )
+                                )
+                              }
+                              className="block font-semibold text-gray-900"
+                            >
+                              {item.name}
+                              <span className="absolute inset-0" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </Popover.Panel>
+              </Transition>
+            </Popover>
+          ) : (
+            <ArrowPathIcon className="h-6 w-6" />
+          )}
           <Popover className="relative">
             <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
               <svg
@@ -366,8 +452,8 @@ export default function Header() {
                   {({ open }) => (
                     <>
                       <Disclosure.Button className="flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">
-                        <UserCircleIcon className="mr-1" />
-                        <span>AmirYoneszadeh</span>
+                        {/* <UserCircleIcon className="mr-1 h-12" /> */}
+                        <span>{user.display_name}</span>
                         <ChevronDownIcon
                           className={classNames(
                             open ? "rotate-180" : "",

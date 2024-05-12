@@ -11,16 +11,31 @@ localforage.config({
   storeName: "user", // نام استور
   description: "test database for login", // توضیحات دیتابیس
 });
+import { Alert, AlertBox } from "./Alert";
 const GustLayout = () => {
-  const { token } = useStateContext();
-  if (token) {
-    // (async () => {
-    //   await localforage.removeItem("ACCESS_TOKEN");
-    // })();
-    return <Navigate to={"/dashboard"} />;
-  }
+  const { token, language } = useStateContext();
+  // if (token) {
+  // (async () => {
+  //   await localforage.removeItem("ACCESS_TOKEN");
+  // })();
+  // return <Navigate to={"/dashboard"} />;
+  // }
   return (
-    <div style={{ minHeight: "100vh" }}>
+    <div
+      className={language && language.direction}
+      style={{ minHeight: "100vh" }}
+    >
+      {/* <AlertBox>
+        <Alert type="success" message="Success alert" />
+        <Alert type="error" message="Error alert" />
+        <Alert
+          type="warning"
+          message="Warning alert"
+          image={{ src: "user.png", alt: "" }}
+        />
+        <Alert type="info" message="Info alert" />
+        <Alert type="fire" message="fire alert" />
+      </AlertBox> */}
       <GustHeader />
       <Outlet />
       <Footer />

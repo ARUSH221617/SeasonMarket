@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Dialog, Transition } from "@headlessui/react";
 import { useStateContext } from "../contexts/ContextProvider";
-import localforage from "localforage";
+import { Alert } from "../components/Alert";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [, setIsAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { token, setToken, user, setUser } = useStateContext();
+  const {setToken, setUser } = useStateContext();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -36,7 +35,7 @@ export default function LoginPage() {
         setIsAlertOpen(true);
         setTimeout(() => {
           setIsAlertOpen(false);
-          navigate("/dashboard"); // Redirect to dashboard after successful login
+          navigate("/dashboard");
         }, 3000);
       } else {
         setAlertMessage("has problem to login; try again later");
@@ -54,33 +53,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <Transition
-        show={isAlertOpen}
-        enter="transition-opacity duration-150"
-        enterFrom="opacity-0"
-        enterTo="opacity-100"
-        leave="transition-opacity duration-150"
-        leaveFrom="opacity-100"
-        leaveTo="opacity-0"
-      >
-        <Dialog
-          open={isAlertOpen}
-          onClose={() => setIsAlertOpen(false)}
-          className="fixed flex items-center justify-center px-3.5 py-2.5 text-white z-10 rounded-md shadow-sm"
-          style={{
-            bottom: "20px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "#4f46e5",
-          }}
-        >
-          <Dialog.Panel className="px-4 text-center">
-            <Dialog.Title className="text-lg font-medium leading-6">
-              {alertMessage}
-            </Dialog.Title>
-          </Dialog.Panel>
-        </Dialog>
-      </Transition>
+      {alertMessage && <Alert type="success" title="Success" message={alertMessage} />}
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img
           className="mx-auto h-10 w-auto"
