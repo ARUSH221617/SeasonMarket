@@ -2,6 +2,7 @@ import { Fragment, useState } from "react";
 import { Dialog, Disclosure, Popover, Transition } from "@headlessui/react";
 import {
   ArrowPathIcon,
+  ArrowTopRightOnSquareIcon,
   Bars3Icon,
   ChartPieIcon,
   CursorArrowRaysIcon,
@@ -15,7 +16,7 @@ import {
   PlayCircleIcon,
   UserCircleIcon,
 } from "@heroicons/react/20/solid";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider";
 import Banner from "./Banner";
 
@@ -83,6 +84,10 @@ const projects = [
     icon: ArrowPathIcon,
   },
 ];
+const UserCallsToAction = [
+  { name: "Edit Profile", href: "#", icon: PlayCircleIcon },
+  { name: "Support", href: "#", icon: PhoneIcon },
+];
 const callsToAction = [
   { name: "Watch demo", href: "#", icon: PlayCircleIcon },
   { name: "Contact sales", href: "#", icon: PhoneIcon },
@@ -94,7 +99,53 @@ function classNames(...classes) {
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, language, languages, setLanguage } = useStateContext();
+  const { user, token, language, languages, setLanguage, setToken, setUser, setIsLoading, addNotification } = useStateContext();
+  const navigate = useNavigate();
+
+  const logout = async (event) => {
+    event.preventDefault();
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({token: token}),
+      });
+      const data = await response.json();
+      if (data.ok) {
+        setToken(null);
+        setUser(null);
+        addNotification({
+          id: Date.now(),
+          title: "",
+          message: `See you Soon.`,
+          type: "success",
+          image: false,
+        });
+        navigate("/");
+      } else {
+        addNotification({
+          id: Date.now(),
+          title: "",
+          message: data.message,
+          type: "error",
+          image: false,
+        });
+      }
+    } catch (error) {
+      console.error("server error: ", error);
+      addNotification({
+        id: Date.now(),
+        title: "Server Error",
+        message: error.message,
+        type: "success",
+        image: false,
+      });
+    }
+    setIsLoading(false);
+  };
 
   return (
     <header className="bg-white">
@@ -105,36 +156,11 @@ export default function Header() {
       >
         <div className="flex lg:flex-1">
           <Link to={"/"} className="-m-1.5 p-1.5">
-            {/* <img
+            <object
+              data="/public/tramPLus-45.svg"
+              type=""
               className="h-8 w-auto"
-              src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-              alt=""
-            /> */}
-            <svg
-              width="1080"
-              height="1080"
-              viewBox="0 0 1080 1080"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-16 w-auto"
-            >
-              <path
-                d="M543 389C543 375.193 554.193 364 568 364H968C981.807 364 993 375.193 993 389V498H702C688.193 498 677 509.193 677 523V814H568C554.193 814 543 802.807 543 789V389Z"
-                fill="#2F18C0"
-              />
-              <path
-                d="M517 389C517 375.193 505.807 364 492 364H92C78.1929 364 67 375.193 67 389V498H358C371.807 498 383 509.193 383 523V814H492C505.807 814 517 802.807 517 789V389Z"
-                fill="#2F18C0"
-              />
-              <path
-                d="M993 240C993 226.193 981.807 215 968 215H568C554.193 215 543 226.193 543 240V349H993V240Z"
-                fill="#2F18C0"
-              />
-              <path
-                d="M517 240C517 226.193 505.807 215 492 215H92C78.1929 215 67 226.193 67 240V349H517V240Z"
-                fill="#2F18C0"
-              />
-            </svg>
+            ></object>
           </Link>
         </div>
         <div className="flex lg:hidden">
@@ -162,82 +188,90 @@ export default function Header() {
             About
           </Link>
 
-          <Popover className="relative">
-            <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
-              Projects
-              <ChevronDownIcon
-                className="h-5 w-5 flex-none text-gray-400"
-                aria-hidden="true"
-              />
-            </Popover.Button>
+          {token && (
+            <Popover className="relative">
+              <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
+                Projects
+                <ChevronDownIcon
+                  className="h-5 w-5 flex-none text-gray-400"
+                  aria-hidden="true"
+                />
+              </Popover.Button>
 
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-200"
-              enterFrom="opacity-0 translate-y-1"
-              enterTo="opacity-100 translate-y-0"
-              leave="transition ease-in duration-150"
-              leaveFrom="opacity-100 translate-y-0"
-              leaveTo="opacity-0 translate-y-1"
-            >
-              <Popover.Panel className="absolute -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5">
-                <div className="p-4">
-                  {projects.map((item) => (
-                    <div
-                      key={item.name}
-                      className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
-                    >
-                      <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-200"
+                enterFrom="opacity-0 translate-y-1"
+                enterTo="opacity-100 translate-y-0"
+                leave="transition ease-in duration-150"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-1"
+              >
+                <Popover.Panel className="absolute -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5">
+                  <div className="p-4">
+                    {projects.map((item) => (
+                      <div
+                        key={item.name}
+                        className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
+                      >
+                        <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-secondary">
+                          <item.icon
+                            className="h-6 w-6 text-gray-600 group-hover:text-white"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <div className="flex-auto">
+                          <a
+                            href={item.href}
+                            className="block font-semibold text-gray-900"
+                          >
+                            {item.name}
+                            <span className="absolute inset-0" />
+                          </a>
+                          <p className="mt-1 text-gray-600">
+                            {item.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50">
+                    {callsToAction.map((item) => (
+                      <a
+                        key={item.name}
+                        href={item.href}
+                        className="group flex items-center justify-center gap-x-2.5 p-3 text-sm font-semibold leading-6 text-gray-900 hover:text-white hover:bg-secondary"
+                      >
                         <item.icon
-                          className="h-6 w-6 text-gray-600 group-hover:text-indigo-600"
+                          className="h-5 w-5 flex-none group-hover:text-white text-gray-400"
                           aria-hidden="true"
                         />
-                      </div>
-                      <div className="flex-auto">
-                        <a
-                          href={item.href}
-                          className="block font-semibold text-gray-900"
-                        >
-                          {item.name}
-                          <span className="absolute inset-0" />
-                        </a>
-                        <p className="mt-1 text-gray-600">{item.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50">
-                  {callsToAction.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className="flex items-center justify-center gap-x-2.5 p-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-100"
-                    >
-                      <item.icon
-                        className="h-5 w-5 flex-none text-gray-400"
-                        aria-hidden="true"
-                      />
-                      {item.name}
-                    </a>
-                  ))}
-                </div>
-              </Popover.Panel>
-            </Transition>
-          </Popover>
+                        {item.name}
+                      </a>
+                    ))}
+                  </div>
+                </Popover.Panel>
+              </Transition>
+            </Popover>
+          )}
 
-          <Link
-            to={"/teams"}
-            className="text-sm font-semibold leading-6 text-gray-900"
-          >
-            Teams
-          </Link>
+          {token && (
+            <Link
+              to={"/teams"}
+              className="text-sm font-semibold leading-6 text-gray-900"
+            >
+              Teams
+            </Link>
+          )}
 
-          <Link
-            to={"/todo"}
-            className="text-sm font-semibold leading-6 text-gray-900"
-          >
-            Todo
-          </Link>
+          {token && (
+            <Link
+              to={"/todo"}
+              className="text-sm font-semibold leading-6 text-gray-900"
+            >
+              Todo
+            </Link>
+          )}
         </Popover.Group>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           {language ? (
@@ -261,17 +295,17 @@ export default function Header() {
                 leaveFrom="opacity-100 translate-y-0"
                 leaveTo="opacity-0 translate-y-1"
               >
-                <Popover.Panel className="absolute -right-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5">
-                  <div className="p-4">
+                <Popover.Panel className="absolute -right-8 top-full z-10 mt-3 w-screen max-w-xs overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5">
+                  <div className="p-2">
                     {languages &&
                       languages.map((item) => (
                         <div
                           key={item.name}
-                          className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
+                          className="group relative flex items-center gap-x-3 rounded-lg p-2 text-sm leading-3 hover:bg-secondary"
                         >
-                          <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                          <div className="flex h-7 w-7 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                             <item.icon
-                              className="h-6 w-6 text-gray-600 group-hover:text-indigo-600"
+                              className="h-6 w-6 text-gray-600 group-hover:text-secondary"
                               aria-hidden="true"
                             />
                           </div>
@@ -284,7 +318,7 @@ export default function Header() {
                                   )
                                 )
                               }
-                              className="block font-semibold text-gray-900"
+                              className="block font-semibold text-gray-900 hover:text-gray-200"
                             >
                               {item.name}
                               <span className="absolute inset-0" />
@@ -299,81 +333,105 @@ export default function Header() {
           ) : (
             <ArrowPathIcon className="h-6 w-6" />
           )}
-          <Popover className="relative">
-            <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="w-6 h-6 mr-1"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
-                  clipRule="evenodd"
+          {token ? (
+            <Popover className="relative">
+              <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-6 h-6 mr-1"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+
+                <span>{user.display_name}</span>
+                <ChevronDownIcon
+                  className="h-5 w-5 flex-none text-gray-400"
+                  aria-hidden="true"
                 />
-              </svg>
+              </Popover.Button>
 
-              <span>{user.display_name}</span>
-              <ChevronDownIcon
-                className="h-5 w-5 flex-none text-gray-400"
-                aria-hidden="true"
-              />
-            </Popover.Button>
-
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-200"
-              enterFrom="opacity-0 translate-y-1"
-              enterTo="opacity-100 translate-y-0"
-              leave="transition ease-in duration-150"
-              leaveFrom="opacity-100 translate-y-0"
-              leaveTo="opacity-0 translate-y-1"
-            >
-              <Popover.Panel className="absolute -right-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5">
-                <div className="p-4">
-                  {userMenu.map((item) => (
-                    <div
-                      key={item.name}
-                      className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
-                    >
-                      <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-200"
+                enterFrom="opacity-0 translate-y-1"
+                enterTo="opacity-100 translate-y-0"
+                leave="transition ease-in duration-150"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-1"
+              >
+                <Popover.Panel className="absolute -right-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5">
+                  <div className="p-4">
+                    {userMenu.map((item) => (
+                      <div
+                        key={item.name}
+                        className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
+                      >
+                        <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                          <item.icon
+                            className="h-6 w-6 text-gray-600 group-hover:text-secondary"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <div className="flex-auto">
+                          <a
+                            href={item.href}
+                            className="block font-semibold text-gray-900"
+                          >
+                            {item.name}
+                            <span className="absolute inset-0" />
+                          </a>
+                          <p className="mt-1 text-gray-600">
+                            {item.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50">
+                    {UserCallsToAction.map((item) => (
+                      <a
+                        key={item.name}
+                        href={item.href}
+                        className="flex items-center justify-center gap-x-2.5 p-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-100"
+                      >
                         <item.icon
-                          className="h-6 w-6 text-gray-600 group-hover:text-indigo-600"
+                          className="h-5 w-5 flex-none text-gray-400"
                           aria-hidden="true"
                         />
-                      </div>
-                      <div className="flex-auto">
-                        <a
-                          href={item.href}
-                          className="block font-semibold text-gray-900"
-                        >
-                          {item.name}
-                          <span className="absolute inset-0" />
-                        </a>
-                        <p className="mt-1 text-gray-600">{item.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 divide-x divide-gray-900/5 bg-gray-50">
-                  {callsToAction.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
+                        {item.name}
+                      </a>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-1 border-t-2 border-gray-900/5 bg-gray-50">
+                    <button
+                      type="button"
                       className="flex items-center justify-center gap-x-2.5 p-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-100"
+                      onClick={logout}
                     >
-                      <item.icon
+                      <ArrowTopRightOnSquareIcon
                         className="h-5 w-5 flex-none text-gray-400"
                         aria-hidden="true"
                       />
-                      {item.name}
-                    </a>
-                  ))}
-                </div>
-              </Popover.Panel>
-            </Transition>
-          </Popover>
+                      Log Out
+                    </button>
+                  </div>
+                </Popover.Panel>
+              </Transition>
+            </Popover>
+          ) : (
+            <Link
+              to={"/login"}
+              className="text-sm font-semibold leading-6 text-gray-900"
+            >
+              Log in <span aria-hidden="true">&rarr;</span>
+            </Link>
+          )}
         </div>
       </nav>
       <Dialog

@@ -1,11 +1,11 @@
-import React, { useContext, useEffect } from "react";
+import React, { ReactElement, useContext, useEffect } from "react";
 import { createContext, useState } from "react";
 import localforage from "localforage";
 import {
-  GlobeAltIcon,
   GlobeAmericasIcon,
   GlobeAsiaAustraliaIcon,
 } from "@heroicons/react/24/outline";
+import { Alert } from "../components/Alert";
 
 localforage.config({
   driver: localforage.LOCALSTORAGE, // درایور مورد نیاز را انتخاب کنید
@@ -25,11 +25,33 @@ const StateContext = createContext({
   setUser: (user) => {},
   setPanel: (panel) => {},
   setLanguage: (language: string) => {},
+  setIsLoading: (isLoading: boolean) => {},
+  addNotification: (notification: Notification) => {},
+  removeNotification: (notification: Notification) => {},
 });
+
+export type NotifyImage = {
+  src: string;
+  alt: string;
+};
+
+export type Notification = {
+  id: number;
+  title: string;
+  message: string | ReactElement;
+  type: string;
+  image: NotifyImage | boolean;
+};
+
+export type Language = {
+  name: string;
+  icon;
+  direction: string;
+};
 
 export const ContextProvider = ({ children }) => {
   const [token, _setToken] = useState({});
-  const [languages, setLanguages] = useState([
+  const [languages, setLanguages] = useState<Language[]>([
     {
       name: "English",
       icon: GlobeAmericasIcon,
@@ -44,6 +66,8 @@ export const ContextProvider = ({ children }) => {
   const [language, _setLanguage] = useState({});
   const [user, setUser] = useState({});
   const [panel, setPanel] = useState({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const setToken = (token) => {
     _setToken(token);
@@ -52,12 +76,10 @@ export const ContextProvider = ({ children }) => {
         // ذخیره کردن داده
         await localforage.setItem("ACCESS_TOKEN", token); // بازیابی داده بر اساس کلید
       })();
-      //   localStorage.setItem("ACCESS_TOKEN", token);
     } else {
       (async () => {
         await localforage.removeItem("ACCESS_TOKEN");
       })();
-      //   localStorage.removeItem("ACCESS_TOKEN");
     }
   };
   const setLanguage = (language) => {
@@ -67,13 +89,25 @@ export const ContextProvider = ({ children }) => {
         // ذخیره کردن داده
         await localforage.setItem("language", language.name); // بازیابی داده بر اساس کلید
       })();
-      //   localStorage.setItem("ACCESS_TOKEN", token);
     } else {
       (async () => {
         await localforage.removeItem("language");
       })();
-      //   localStorage.removeItem("ACCESS_TOKEN");
     }
+  };
+
+  const addNotification = (notification: Notification) => {
+    const newNotification = notification;
+    setNotifications((prevNotifications) => [
+      ...prevNotifications,
+      newNotification,
+    ]);
+  };
+
+  const removeNotification = (notification: Notification) => {
+    setNotifications((prevNotifications) =>
+      prevNotifications.filter((item) => item.id !== notification.id)
+    );
   };
 
   useEffect(() => {
@@ -100,24 +134,6 @@ export const ContextProvider = ({ children }) => {
     };
     initialize();
   }, []);
-
-  // useEffect(() => {
-  //   const initializeLanguages = async () => {
-  //     setLanguage([
-  //       {
-  //         name: "English",
-  //         icon: GlobeAltIcon,
-  //         direction: "ltr",
-  //       },
-  //       {
-  //         name: "Persian",
-  //         icon: GlobeAltIcon,
-  //         direction: "rtl",
-  //       },
-  //     ]);
-  //   };
-  //   initializeLanguages();
-  // }, []);
 
   useEffect(() => {
     const initializeLanguage = async () => {
@@ -148,6 +164,10 @@ export const ContextProvider = ({ children }) => {
         panel,
         language,
         languages,
+        isLoading,
+        setIsLoading,
+        addNotification,
+        removeNotification,
         setUser,
         setToken,
         setPanel,
@@ -155,6 +175,20 @@ export const ContextProvider = ({ children }) => {
       }}
     >
       {children}
+      <div
+        className={"fixed bottom-10 left-5 w-full max-w-sm flex flex-col gap-4"}
+      >
+        {notifications &&
+          notifications.map((notify, index) => (
+            <Alert
+              key={index}
+              type={notify.type}
+              title={notify.title}
+              message={notify.message}
+              image={notify.image}
+            />
+          ))}
+      </div>
     </StateContext.Provider>
   );
 };

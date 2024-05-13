@@ -9,7 +9,7 @@ const DefaultLayout = () => {
     return <Navigate to={"/login"} />;
   }
   return (
-    <div className="min-h-full flex-1" style={{minHeight: "100vh"}}>
+    <div className="flex flex-col" style={{minHeight: "100vh"}}>
       <Header />
       <Outlet />
       <Footer />

@@ -6,10 +6,8 @@ import { Alert } from "../components/Alert";
 export default function LoginPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
-  const [, setIsAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const {setToken, setUser } = useStateContext();
+  const { setToken, setUser, addNotification } = useStateContext();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -31,29 +29,38 @@ export default function LoginPage() {
       if (data.ok) {
         setToken(data.data.token);
         setUser(data.data.user);
-        setAlertMessage(`Welcome Back ${data.data.display_name}`);
-        setIsAlertOpen(true);
-        setTimeout(() => {
-          setIsAlertOpen(false);
-          navigate("/dashboard");
-        }, 3000);
+        addNotification({
+          id: Date.now(),
+          title: "",
+          message: `Welcome Back ${data.data.display_name}`,
+          type: "success",
+          image: false,
+        });
+        navigate("/dashboard");
       } else {
-        setAlertMessage("has problem to login; try again later");
-        setIsAlertOpen(true);
-        setTimeout(() => setIsAlertOpen(false), 3000);
+        addNotification({
+          id: Date.now(),
+          title: "",
+          message: data.message,
+          type: "error",
+          image: false,
+        });
       }
     } catch (error) {
       console.error("server error: ", error);
-      setAlertMessage("connection to server failed");
-      setIsAlertOpen(true);
-      setTimeout(() => setIsAlertOpen(false), 3000);
+      addNotification({
+        id: Date.now(),
+        title: "Server Error",
+        message: error.message,
+        type: "success",
+        image: false,
+      });
     }
     setIsLoading(false);
   };
 
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      {alertMessage && <Alert type="success" title="Success" message={alertMessage} />}
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img
           className="mx-auto h-10 w-auto"
