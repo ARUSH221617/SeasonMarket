@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider";
-import { Alert } from "../components/Alert";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -52,7 +51,7 @@ export default function LoginPage() {
         id: Date.now(),
         title: "Server Error",
         message: error.message,
-        type: "success",
+        type: "error",
         image: false,
       });
     }
@@ -60,28 +59,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
-          className="mx-auto h-10 w-auto"
-          src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-          alt="ARUSH"
-        />
-        <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-          Sign in to your account
-        </h2>
-      </div>
+    <div className="flex min-h-full flex-1 flex-row max-md:flex-col">
+      <div className="flex w-full overflow-hidden min-h-full flex-1 flex-col justify-center px-6 py-12 max-md:px-2 max-md:py-6 lg:px-8 relative">
+        <Link
+          to={"/"}
+          className="absolute max-md:relative max-md:flex max-md:items-center max-md:justify-center top-5 left-5 max-md:inset-0"
+        >
+          <img
+            className="mx-auto h-28 w-auto max-md:h-38"
+            src="/public/persianTramPLus.svg"
+            alt="ARUSH"
+          />
+        </Link>
+        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+          <h2 className="mt-10 text-start text-[30px] font-[Poppins] font-medium leading-9 tracking-tight text-gray-900">
+            Sign in
+          </h2>
+        </div>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form className="space-y-6" onSubmit={submit}>
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              UserName/Email address
-            </label>
-            <div className="mt-2">
+        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+          <form className="space-y-6" onSubmit={submit}>
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium leading-6 text-gray-900 sr-only"
+              >
+                UserName/Email address
+              </label>
               <input
                 id="username"
                 name="username"
@@ -89,83 +93,124 @@ export default function LoginPage() {
                 autoComplete="username"
                 required
                 onChange={handleInputChange}
-                className="block w-full rounded-md border-0 py-1.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                placeholder="Enter email or user name"
+                className="block w-full rounded-lg border-0 py-4 px-6 text-secondary bg-secondary-75 text-[15px] placeholder:font-light placeholder:font-Poppins font-Poppins placeholder:text-secondary focus:ring-2 focus:ring-inset focus:ring-secondary"
               />
             </div>
-          </div>
 
-          <div>
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Password
-              </label>
-              <div className="text-sm">
-                <Link
-                  to={"/passwordReset"}
-                  className="font-semibold text-indigo-600 hover:text-indigo-500"
+            <div>
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium leading-6 text-gray-900 sr-only"
                 >
-                  Forgot password?
-                </Link>
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  placeholder="Password"
+                  onChange={handleInputChange}
+                  className="block w-full rounded-lg border-0 py-4 px-6 text-secondary bg-secondary-75 text-[15px] placeholder:font-light placeholder:font-Poppins font-Poppins placeholder:text-secondary focus:ring-2 focus:ring-inset focus:ring-secondary"
+                />
               </div>
             </div>
-            <div className="mt-2">
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                onChange={handleInputChange}
-                className="block w-full rounded-md border-0 py-1.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              />
+
+            <div className="text-sm text-end">
+              <Link
+                to={"/passwordReset"}
+                className="font-semibold text-gray-400 hover:bg-gradient-to-r hover:from-secondary hover:to-primary px-2 hover:rounded-md transition-colors py-1.5 hover:text-white"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                className="flex w-full justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary shadow-2xl shadow-primary"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <div
+                      className="inline-block mr-2 h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+                      role="status"
+                    >
+                      <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                        Loading...
+                      </span>
+                    </div>
+                    <span>Be Paint...</span>
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </button>
+            </div>
+          </form>
+
+          <p className="mt-10 text-center text-sm text-gray-500">
+            Not a member?{" "}
+            <Link
+              to={"/signup"}
+              className="font-semibold leading-6 text-secondary hover:text-secondary-800"
+            >
+              Sign up here
+            </Link>
+          </p>
+        </div>
+      </div>
+      <div className="max-md:hidden flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        <div className="bg-gradient-to-r to-primary from-secondary min-h-full rounded-2xl relative">
+          <div className="absolute top-5 right-5">
+            <span
+              className="text-white flex flex-row gap-2 items-center font-[Poppins]"
+              style={{ fontSize: "15px" }}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g clipPath="url(#clip0_152_16479)">
+                  <path
+                    d="M13.619 10.2746L11.6652 8.32085C10.9675 7.62308 9.78126 7.90222 9.50215 8.80928C9.29282 9.4373 8.59506 9.78618 7.96707 9.6466C6.57154 9.29772 4.68757 7.48353 4.33869 6.01822C4.12936 5.39021 4.54802 4.69244 5.17601 4.48314C6.0831 4.20403 6.36221 3.01783 5.66445 2.32007L3.7107 0.366327C3.15249 -0.122109 2.31518 -0.122109 1.82674 0.366327L0.500987 1.69208C-0.824766 3.08761 0.64054 6.78576 3.92003 10.0653C7.19953 13.3448 10.8977 14.8799 12.2932 13.4843L13.619 12.1586C14.1074 11.6003 14.1074 10.763 13.619 10.2746Z"
+                    fill="white"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0_152_16479">
+                    <rect width="14" height="14" fill="white" />
+                  </clipPath>
+                </defs>
+              </svg>
+              +98 937 688 4541
+            </span>
+          </div>
+          <div className="m-full h-full flex flex-col flex-1 items-center justify-center">
+            <object data="/public/3d-user-computer.svg" type=""></object>
+            <div className="text-white w-full px-10 py-4">
+              <h2
+                className="font-[Poppins] font-semibold"
+                style={{ fontSize: "40px" }}
+              >
+                Sign in to name
+              </h2>
+              <h2
+                className="font-[Poppins] font-light"
+                style={{ fontSize: "20px" }}
+              >
+                Sign in to name
+              </h2>
             </div>
           </div>
-
-          <div>
-            <button
-              type="submit"
-              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin mr-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-                      />
-                    </svg>
-                  </div>
-                  <span>Be Paint...</span>
-                </>
-              ) : (
-                "Sign In"
-              )}
-            </button>
-          </div>
-        </form>
-
-        <p className="mt-10 text-center text-sm text-gray-500">
-          Not a member?{" "}
-          <Link
-            to={"/signup"}
-            className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
-          >
-            Sign up here
-          </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

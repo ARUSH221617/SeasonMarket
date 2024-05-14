@@ -7,6 +7,8 @@ import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 import GustLayout from "./components/GustLayout";
 import DefaultLayout from "./components/DefaultLayout";
+import FreeLayout from "./components/FreeLayout";
+import SignupPage from "./pages/SignupPage";
 
 const router = createBrowserRouter([
   {
@@ -21,10 +23,6 @@ const router = createBrowserRouter([
         path: "/about",
         element: <AboutPage />,
       },
-      {
-        path: "/login",
-        element: <LoginPage />,
-      },
     ],
   },
   {
@@ -34,6 +32,20 @@ const router = createBrowserRouter([
       {
         path: "/dashboard",
         element: <DashboardPage />,
+      },
+    ],
+  },
+  {
+    path: "/",
+    element: <FreeLayout />,
+    children: [
+      {
+        path: "/login",
+        element: <LoginPage />,
+      },
+      {
+        path: "/signup",
+        element: <SignupPage />,
       },
     ],
   },

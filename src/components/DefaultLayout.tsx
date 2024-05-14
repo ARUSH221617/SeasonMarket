@@ -4,12 +4,12 @@ import Footer from "./Footer";
 import { Navigate, Outlet } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider";
 const DefaultLayout = () => {
-  const {user, token} = useStateContext();
+  const { token } = useStateContext();
   if (!token) {
     return <Navigate to={"/login"} />;
   }
   return (
-    <div className="flex flex-col" style={{minHeight: "100vh"}}>
+    <div className="flex flex-col" style={{ minHeight: "100vh" }}>
       <Header />
       <Outlet />
       <Footer />

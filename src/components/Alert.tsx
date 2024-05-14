@@ -2,6 +2,7 @@ import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { Transition } from "@headlessui/react";
 import React, { useEffect, useState } from "react";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import { useStateContext } from "../contexts/ContextProvider";
 const types = {
   success: {
     text: "text-gray",
@@ -160,28 +161,37 @@ const types = {
     iconColor: "text-light",
   },
 };
-export const Alert = ({ type = "default", title, message, image }) => {
+export const Alert = ({ nid, type = "default", title, message, image }) => {
   const [showAlert, setShowAlert] = useState(true);
   const [showAlertTime, setShowAlertTime] = useState(4500);
+  const { removeNotification } = useStateContext();
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowAlert(false), showAlertTime);
+    const timer = setTimeout(() => {
+      setShowAlert(false);
+      removeNotification({
+        id: nid,
+        title: title,
+        message: message,
+        type: type,
+        image: image,
+      });
+    }, showAlertTime);
     return () => clearTimeout(timer);
   }, [showAlertTime]);
 
   return (
     <Transition
       show={showAlert}
-      enter="transition-transform ease-in duration-1000"
+      enter="transition ease-in-out duration-1000"
       enterFrom="-translate-x-full"
       enterTo="translate-x-0"
-      leave="transition-transform ease-out duration-1000"
+      leave="transition ease-in-out duration-1000"
       leaveFrom="translate-x-0"
       leaveTo="-translate-x-full"
-      className={"min-w-full"}
     >
       <div
-        className={`flex flex-row items-center gap-3 shadow w-full p-4 ${types[type].text} ${types[type].bg} ${types[type].divide}`}
+        className={`flex flex-row items-center gap-3 shadow w-full p-4 max-sm:p-2 max-sm:gap-2 ${types[type].text} ${types[type].bg} ${types[type].divide}`}
         onMouseOver={() => setShowAlertTime(4500)}
         role="alert"
       >
