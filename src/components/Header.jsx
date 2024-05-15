@@ -1,3 +1,4 @@
+import persianTramPLus from "/public/persianTramPLus.svg";
 import { Fragment, useState } from "react";
 import { Dialog, Disclosure, Popover, Transition } from "@headlessui/react";
 import {
@@ -168,7 +169,7 @@ export default function Header() {
         <div className="flex lg:flex-1">
           <Link to={"/"} className="-m-1.5 p-1.5">
             <object
-              data="/public/persianTramPLus.svg"
+              data={persianTramPLus}
               type=""
               className="h-16 w-auto"
             ></object>
@@ -455,7 +456,7 @@ export default function Header() {
           <div className="flex items-center justify-between">
             <Link to={"/"} className="-m-1.5 p-1.5">
               <object
-                data="/public/persianTramPLus.svg"
+                data={persianTramPLus}
                 type=""
                 className="h-16 w-auto"
               ></object>

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider";
+import persianTramPLus from "/public/persianTramPLus.svg";
+import SVG3dUserComputer from "/public/3d-user-computer.svg";
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -101,7 +103,7 @@ export default function SignupPage() {
         >
           <img
             className="mx-auto h-28 w-auto max-md:h-38"
-            src="/public/persianTramPLus.svg"
+            src={persianTramPLus}
             alt="ARUSH"
           />
         </Link>
@@ -234,7 +236,7 @@ export default function SignupPage() {
             </span>
           </div>
           <div className="m-full h-full flex flex-col flex-1 items-center justify-center">
-            <object data="/public/3d-user-computer.svg" type=""></object>
+            <object data={SVG3dUserComputer} type=""></object>
             <div className="text-white w-full px-10 py-4">
               <h2
                 className="font-[Poppins] font-semibold"
