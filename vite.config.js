@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://api.arush-script.ir',
+        target: 'http://api.arush-script.ir/api',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

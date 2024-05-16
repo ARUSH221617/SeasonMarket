@@ -264,7 +264,7 @@ export const ContextProvider = ({ children }) => {
       {!isLoading && children}
       <div
         className={
-          "fixed min-sm:bottom-10 max-sm:top-5 left-5 max-sm:px-2 max-sm:left-0 w-full max-w-sm flex flex-col gap-4"
+          "fixed bottom-10 max-sm:bottom-full max-sm:top-5 left-5 max-sm:px-2 max-sm:left-0 w-full max-w-sm flex flex-col gap-4"
         }
       >
         {notifications &&
