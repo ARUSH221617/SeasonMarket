@@ -6,8 +6,9 @@ import SVG3dUserComputer from "/public/3d-user-computer.svg";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ mobile: "" });
   const [isLoading, setIsLoading] = useState(false);
+  const [step, setStepTo] = useState(1);
   const { setToken, setUser, addNotification } = useStateContext();
 
   const handleInputChange = (event) => {
@@ -19,7 +20,8 @@ export default function LoginPage() {
     event.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch("/api/login", {
+      const apiUrl = step === 1 ? "/api/send_otp" : "/api/login";
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -28,16 +30,28 @@ export default function LoginPage() {
       });
       const data = await response.json();
       if (data.ok) {
-        setToken(data.data.token);
-        setUser(data.data.user);
-        addNotification({
-          id: Date.now(),
-          title: "",
-          message: `Welcome Back ${data.data.display_name}`,
-          type: "success",
-          image: false,
-        });
-        navigate("/dashboard");
+        if (step === 1) {
+          addNotification({
+            id: Date.now(),
+            title: "",
+            message: `Otp Was Sent To ${form.mobile}`,
+            type: "success",
+            image: false,
+          });
+          setStepTo(2);
+        }
+        if (step === 2) {
+          setToken(data.data.token);
+          setUser(data.data.user);
+          addNotification({
+            id: Date.now(),
+            title: "",
+            message: `Welcome Back ${data.data.display_name}`,
+            type: "success",
+            image: false,
+          });
+          navigate("/dashboard");
+        }
       } else {
         addNotification({
           id: Date.now(),
@@ -83,43 +97,43 @@ export default function LoginPage() {
           <form className="space-y-6" onSubmit={submit}>
             <div>
               <label
-                htmlFor="username"
+                htmlFor="mobile"
                 className="block text-sm font-medium leading-6 text-gray-900 sr-only"
               >
-                UserName/Email address
+                Mobile
               </label>
               <input
-                id="username"
-                name="username"
+                id="mobile"
+                name="mobile"
                 type="text"
-                autoComplete="username"
+                autoComplete="mobile"
                 required
                 onChange={handleInputChange}
-                placeholder="Enter email or user name"
+                placeholder="Enter mobile number"
                 className="block w-full rounded-lg border-0 py-4 px-6 text-secondary bg-secondary-75 text-[15px] placeholder:font-light placeholder:font-Poppins font-Poppins placeholder:text-secondary focus:ring-2 focus:ring-inset focus:ring-secondary"
               />
             </div>
 
-            <div>
-              <div className="flex items-center justify-between">
+            {step === 2 && (
+              <div>
                 <label
-                  htmlFor="password"
+                  htmlFor="mobile"
                   className="block text-sm font-medium leading-6 text-gray-900 sr-only"
                 >
-                  Password
+                  Mobile
                 </label>
                 <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
+                  id="mobile"
+                  name="mobile"
+                  type="text"
+                  autoComplete="mobile"
                   required
-                  placeholder="Password"
                   onChange={handleInputChange}
+                  placeholder="Enter mobile number"
                   className="block w-full rounded-lg border-0 py-4 px-6 text-secondary bg-secondary-75 text-[15px] placeholder:font-light placeholder:font-Poppins font-Poppins placeholder:text-secondary focus:ring-2 focus:ring-inset focus:ring-secondary"
                 />
               </div>
-            </div>
+            )}
 
             <div className="text-sm text-end">
               <Link

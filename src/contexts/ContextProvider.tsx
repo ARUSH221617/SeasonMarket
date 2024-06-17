@@ -162,8 +162,8 @@ export const ContextProvider = ({ children }) => {
       }
     };
     initializeLanguage();
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 5000);
+    // setIsLoading(true);
+    // setTimeout(() => setIsLoading(false), 5000);
   }, []);
 
   return (

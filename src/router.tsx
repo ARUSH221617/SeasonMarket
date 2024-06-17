@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import DashboardPage from "./pages/DashboardPage";
+import TodoPage from "./pages/TodoPage";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 import GustLayout from "./components/GustLayout";
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
       {
         path: "/dashboard",
         element: <DashboardPage />,
+      },
+      {
+        path: "/todo",
+        element: <TodoPage />,
       },
     ],
   },
