@@ -117,19 +117,19 @@ export default function LoginPage() {
             {step === 2 && (
               <div>
                 <label
-                  htmlFor="mobile"
+                  htmlFor="otp"
                   className="block text-sm font-medium leading-6 text-gray-900 sr-only"
                 >
-                  Mobile
+                  Otp Code
                 </label>
                 <input
-                  id="mobile"
-                  name="mobile"
+                  id="otp"
+                  name="otp"
                   type="text"
-                  autoComplete="mobile"
+                  autoComplete="off"
                   required
                   onChange={handleInputChange}
-                  placeholder="Enter mobile number"
+                  placeholder="Enter Otp Code"
                   className="block w-full rounded-lg border-0 py-4 px-6 text-secondary bg-secondary-75 text-[15px] placeholder:font-light placeholder:font-Poppins font-Poppins placeholder:text-secondary focus:ring-2 focus:ring-inset focus:ring-secondary"
                 />
               </div>
