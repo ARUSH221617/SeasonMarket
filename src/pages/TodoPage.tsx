@@ -3,21 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider";
 import { Transition } from "@headlessui/react";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import {
-  DndContext,
-  closestCenter,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
 type Todo = {
   id: number;
@@ -44,9 +29,10 @@ export default function LoginPage() {
   });
   const [todo, setTodo] = useState<Todo[]>([]);
   const [selectedTodo, setSelectedTodo] = useState<Todo>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setLoadingState] = useState(false);
   const [showAddTodoPopup, setShowAddTodoPopup] = useState(false);
-  const { setToken, setUser, addNotification } = useStateContext();
+  const { setToken, setUser, addNotification, setIsLoading } =
+    useStateContext();
 
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -56,7 +42,8 @@ export default function LoginPage() {
 
   const submitTodo = async (event) => {
     event.preventDefault();
-    setIsLoading(true);
+    setLoadingState(true);
+    console.log("Submitting todo:", form); // Debugging
     try {
       const response = await fetch("/api/todo/add", {
         method: "POST",
@@ -95,11 +82,12 @@ export default function LoginPage() {
         image: false,
       });
     }
-    setIsLoading(false);
+    setLoadingState(false);
   };
 
   const deleteTodo = async () => {
-    setIsLoading(true);
+    setLoadingState(true);
+    console.log("Deleting todo:", selectedTodo); // Debugging
     try {
       const response = await fetch(`/api/todo/delete/${selectedTodo?.id}`, {
         method: "POST",
@@ -139,11 +127,10 @@ export default function LoginPage() {
         image: false,
       });
     }
-    setIsLoading(false);
+    setLoadingState(false);
   };
 
   const fetchTodo = async () => {
-    setIsLoading(true);
     try {
       const response = await fetch("/api/todo/get");
       const data = await response.json();
@@ -180,47 +167,9 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
+    setIsLoading(true);
     fetchTodo();
   }, [showAddTodoPopup]);
-
-  const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        distance: 10,
-      },
-    })
-  );
-
-  const onDragEnd = (event) => {
-    const { active, over } = event;
-    if (active.id !== over.id) {
-      setTodo((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        const newItems = [...items];
-        const [movedItem] = newItems.splice(oldIndex, 1);
-        newItems.splice(newIndex, 0, movedItem);
-        return newItems;
-      });
-    }
-  };
-
-  function SortableItem(props) {
-    const { attributes, listeners, setNodeRef, transform, transition } =
-      useSortable({ id: props.id });
-
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-    };
-
-    return (
-      <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-        {props.children}
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-full flex-1 flex-row max-md:flex-col">
@@ -229,79 +178,76 @@ export default function LoginPage() {
           <h1 className="font-Poppins font-extrabold text-xl">Todo</h1>
           <button
             type="button"
-            onClick={() => setShowAddTodoPopup(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setForm({
+                id: 0,
+                name: "",
+                description: "",
+                status: "publish",
+                priority: 1,
+                notify: true,
+                start_date: "",
+                end_date: "",
+              });
+              setShowAddTodoPopup(true);
+            }}
             className="py-1.5 px-3 bg-blue-500 text-white font-Poppins font-[15px] rounded shadow"
           >
             Add New Todo
           </button>
         </div>
         <div className="flex gap-4 w-full py-4 px-3 flex-wrap flex-row justify-start overflow-auto max-h-[500px]">
-          {todo && (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={onDragEnd}
+          {todo.map((item, index) => (
+            <div
+              key={index}
+              className="relative bg-secondary-200 p-4 rounded-none shadow font-Poppins min-w-[300px] min-h-[300px] max-w-full max-h-full"
             >
-              <SortableContext
-                items={todo}
-                strategy={verticalListSortingStrategy}
-              >
-                {todo.map((item) => (
-                  <SortableItem key={item.id} id={item.id}>
-                    <div
-                      key={item.id}
-                      className="relative bg-secondary-200 p-4 rounded-none shadow font-Poppins min-w-[300px] min-h-[300px] max-w-full max-h-full"
-                    >
-                      <h2
-                        dangerouslySetInnerHTML={{ __html: item.name }}
-                        className="text-lg font-bold"
-                      ></h2>
-                      <p
-                        dangerouslySetInnerHTML={{ __html: item.description }}
-                      ></p>
-                      <div className="absolute bottom-0 left-0 w-full px-2 py-1 flex flex-row gap-2 justify-end">
-                        <button
-                          type="button"
-                          className="text-black"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            setForm({
-                              id: item.id,
-                              name: item.name,
-                              description: item.description,
-                              status: item.status,
-                              priority: item.priority,
-                              notify: item.notify,
-                              start_date: item.start_date
-                                .replace(" ", "T")
-                                .slice(0, -3),
-                              end_date: item.end_date
-                                .replace(" ", "T")
-                                .slice(0, -3),
-                            });
-                            setShowAddTodoPopup(true);
-                          }}
-                        >
-                          <PencilIcon className="w-6 h-6" />
-                        </button>
-                        <button
-                          type="button"
-                          className="text-black"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            setSelectedTodo(item);
-                            deleteTodo();
-                          }}
-                        >
-                          <TrashIcon className="w-6 h-6" />
-                        </button>
-                      </div>
-                    </div>
-                  </SortableItem>
-                ))}
-              </SortableContext>
-            </DndContext>
-          )}
+              <h2
+                dangerouslySetInnerHTML={{ __html: item.name }}
+                className="text-lg font-bold"
+              ></h2>
+              <p dangerouslySetInnerHTML={{ __html: item.description }}></p>
+              <div className="absolute bottom-0 left-0 w-full px-2 py-1 flex flex-row gap-2 justify-end">
+                <button
+                  type="button"
+                  className="text-black"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    setForm({
+                      id: item.id,
+                      name: item.name,
+                      description: item.description,
+                      status: item.status,
+                      priority: item.priority,
+                      notify: item.notify,
+                      start_date: item.start_date
+                        .replace(" ", "T")
+                        .slice(0, -3),
+                      end_date: item.end_date.replace(" ", "T").slice(0, -3),
+                    });
+                    setSelectedTodo(item);
+                    setShowAddTodoPopup(true);
+                  }}
+                >
+                  <PencilIcon className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  className="text-red-600"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    setSelectedTodo(item);
+                    deleteTodo();
+                  }}
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
       <Transition
