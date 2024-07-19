@@ -105,7 +105,8 @@ export default function LoginPage() {
               <input
                 id="mobile"
                 name="mobile"
-                type="text"
+                type="number"
+                inputMode="numeric"
                 autoComplete="mobile"
                 required
                 onChange={handleInputChange}

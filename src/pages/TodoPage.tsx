@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider";
 import { Transition } from "@headlessui/react";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
@@ -29,10 +29,11 @@ export default function LoginPage() {
   });
   const [todo, setTodo] = useState<Todo[]>([]);
   const [selectedTodo, setSelectedTodo] = useState<Todo>();
-  const [isLoading, setLoadingState] = useState(false);
+  const [isLoadingState, setLoadingState] = useState(false);
+  const [refresh, setRefresh] = useState(false);
   const [showAddTodoPopup, setShowAddTodoPopup] = useState(false);
-  const { setToken, setUser, addNotification, setIsLoading } =
-    useStateContext();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { setToken, setUser, addNotification } = useStateContext();
 
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -130,48 +131,142 @@ export default function LoginPage() {
     setLoadingState(false);
   };
 
-  const fetchTodo = async () => {
-    try {
-      const response = await fetch("/api/todo/get");
-      const data = await response.json();
-      if (data.ok) {
-        setToken(data.data.token);
-        setTodo(data.data.todo);
-        addNotification({
-          id: Date.now(),
-          title: "",
-          message: `your todo will be loaded.`,
-          type: "info",
-          image: false,
-        });
-      } else {
-        addNotification({
-          id: Date.now(),
-          title: "",
-          message: data.message,
-          type: "error",
-          image: false,
-        });
-      }
-    } catch (error) {
-      console.error("server error: ", error);
-      addNotification({
-        id: Date.now(),
-        title: "Server Error",
-        message: error.message,
-        type: "error",
-        image: false,
-      });
-    }
-    setIsLoading(false);
-  };
-
   useEffect(() => {
-    setIsLoading(true);
+    let isMounted = true;
+    // setIsLoading(true);
+
+    const fetchTodo = async () => {
+      try {
+        const response = await fetch("/api/todo/get");
+        const data = await response.json();
+        if (data.ok && isMounted) {
+          setToken(data.data.token);
+          setTodo(data.data.todo);
+          addNotification({
+            id: Date.now(),
+            title: "",
+            message: `your todo will be loaded.`,
+            type: "info",
+            image: false,
+          });
+        } else if (isMounted) {
+          addNotification({
+            id: Date.now(),
+            title: "",
+            message: data.message,
+            type: "error",
+            image: false,
+          });
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error("server error: ", error);
+          addNotification({
+            id: Date.now(),
+            title: "Server Error",
+            message: error.message,
+            type: "error",
+            image: false,
+          });
+        }
+      } finally {
+        if (isLoading) {
+          setIsLoading(false);
+        }
+      }
+      // console.log(isLoading);
+      // if (isMounted) {
+      // debugger;
+      // }
+    };
+
     fetchTodo();
+
+    return () => {
+      isMounted = false;
+    };
   }, [showAddTodoPopup]);
 
-  return (
+  return isLoading ? (
+    <Transition
+      show={isLoading}
+      enter="transition-opacity duration-500"
+      enterFrom="opacity-0"
+      enterTo="opacity-100"
+      leave="transition-opacity duration-500"
+      leaveFrom="opacity-100"
+      leaveTo="opacity-0"
+      style={{ zIndex: 99999999 }}
+    >
+      <div className="flex justify-center items-center fixed min-h-dvh w-full top-0 left-0 bg-gradient-to-r from-secondary to-primary text-white">
+        <div className="flex flex-col flex-1 items-center justify-center gap-6">
+          <svg
+            width="182"
+            height="119"
+            viewBox="0 0 182 119"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M92 29.8C92 29.2478 92.4477 28.8 93 28.8H181C181.552 28.8 182 29.2478 182 29.8V54.6C182 55.1523 181.552 55.6 181 55.6H119.8C119.248 55.6 118.8 56.0478 118.8 56.6V117.8C118.8 118.352 118.352 118.8 117.8 118.8H93C92.4477 118.8 92 118.352 92 117.8V29.8Z"
+              fill="url(#paint0_linear_220_340)"
+            />
+            <path
+              d="M90 30C90 29.4477 89.5523 29 89 29H1C0.447715 29 0 29.4477 0 30V54.8C0 55.3523 0.447714 55.8 0.999999 55.8H62.2C62.7523 55.8 63.2 56.2477 63.2 56.8V118C63.2 118.552 63.6477 119 64.2 119H89C89.5523 119 90 118.552 90 118V30Z"
+              fill="url(#paint1_linear_220_340)"
+            />
+            <path
+              d="M0 1C0 0.447716 0.447715 0 1 0L162 0C173.046 0 182 8.95431 182 20V25.8C182 26.3523 181.552 26.8 181 26.8L0.999995 26.8C0.44771 26.8 0 26.3523 0 25.8L0 1Z"
+              fill="url(#paint2_linear_220_340)"
+            />
+            <defs>
+              <linearGradient
+                id="paint0_linear_220_340"
+                x1="92"
+                y1="28.8"
+                x2="182"
+                y2="118.8"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stopColor="#FFF" />
+                <stop offset="1" stopColor="#F1F1F1F1" />
+              </linearGradient>
+              <linearGradient
+                id="paint1_linear_220_340"
+                x1="90"
+                y1="29"
+                x2="0"
+                y2="119"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stopColor="#FFF" />
+                <stop offset="1" stopColor="#F1F1F1F1" />
+              </linearGradient>
+              <linearGradient
+                id="paint2_linear_220_340"
+                x1="0"
+                y1="0"
+                x2="145.411"
+                y2="87.5623"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stopColor="#FFF" />
+                <stop offset="1" stopColor="#F1F1F1F1" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div
+            className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+            role="status"
+          >
+            <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+              Loading...
+            </span>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  ) : (
     <div className="flex min-h-full flex-1 flex-row max-md:flex-col">
       <div className="w-full px-3">
         <div className="flex justify-between w-full">
@@ -430,9 +525,9 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   className="flex w-full justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary shadow-2xl shadow-primary"
-                  disabled={isLoading}
+                  disabled={isLoadingState}
                 >
-                  {isLoading ? (
+                  {isLoadingState ? (
                     <>
                       <div
                         className="inline-block mr-2 h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
